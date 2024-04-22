@@ -1,0 +1,77 @@
+---
+title: "UNICEF"
+format: html
+editor: visual
+---
+
+## Data pre
+
+```{r}
+dat1 = read.csv('unicef_indicator_1.csv')
+dat2 = read.csv('unicef_indicator_2.csv')
+dat3 = read.csv('unicef_metadata.csv')
+
+```
+
+## A Word Map chart
+
+```{r}
+# install.packages("maps")
+# install.packages("sf")
+library(ggplot2)
+library(maps)
+library(sf)
+
+world_map_dat = map_data("world")
+ggplot(data = world_map_dat, aes(x = long, y = lat, group = group)) +
+  geom_polygon(fill = 'lightblue', color = "white") +
+  theme_classic() +
+  labs(title = "World Map", x = "", y = "")+
+  theme(plot.title = element_text(hjust=0.5))
+```
+
+## A bar chart
+
+```{r}
+library(ggsci)
+dat_bar = dat3[which(dat3$year == 2022),]
+dat_bar = dat_bar[order(dat_bar$Population..total, decreasing = T),][1:10,]
+dat_bar$country = factor(dat_bar$country, labels = dat_bar$country, levels = dat_bar$country)
+ggplot(dat_bar, aes(x=country, y=Population..total))+
+  geom_bar(stat = 'identity', fill='#008080')+
+  theme_classic()+
+  labs(y='Population',title='The top 10 countries by population in 2022')+
+  theme(plot.title = element_text(hjust = 0.5))
+  
+```
+
+## A scatter plot with a linear regression line
+
+```{r}
+library(dplyr)
+dat_sum = dat3 %>% 
+  group_by(year) %>% 
+  summarise(mean_num=mean(Population..total, na.rm = T))
+
+ggplot(dat_sum, aes(x=year, y=mean_num))+
+  geom_point()+
+  geom_smooth(method = "lm", se = FALSE, color='#008080') +
+  theme_classic()+
+  labs(x='Year',y='Mean population', title = 'Mean population among years')+
+  theme(plot.title = element_text(hjust=0.5))
+```
+
+## A time-series chart
+
+```{r}
+dat_time = dat3[which(dat3$country == 'China'),]
+dat_time$year = as.factor(dat_time$year)
+
+ggplot(dat_time, aes(x=year, y=Population..total))+
+  geom_bar(stat = 'identity', fill='#008080', width = 0.5)+
+  theme_classic()+
+  labs(y='Population',title='Population in China among years')+
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle= 90, vjust = 0.5,  size=7))
+  
+```
